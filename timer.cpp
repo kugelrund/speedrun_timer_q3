@@ -1,6 +1,6 @@
-#include "../../server/exe_headers.h"
 #include "timer.h"
 #include "timer_helper.h"
+#include "../speedrun_timer_includes.h"
 
 #include <algorithm>
 #include <array>
@@ -72,7 +72,7 @@ void SpeedrunUpdateTimer()
 		return;
 	}
 
-	const int currentTimestamp = Sys_Milliseconds();
+	const int currentTimestamp = SpeedrunTimerGetSystemMilliseconds();
 	info.currentTotalTime = storedTotalTime + (currentTimestamp - lastTimestamp);
 	info.currentLevelTime = storedLevelTime + (currentTimestamp - lastTimestamp);
 }
@@ -82,13 +82,13 @@ void SpeedrunUnpauseTimer(int priority)
 	pause_state.unpause(priority);
 	if (!pause_state.isPaused())
 	{
-		lastTimestamp = Sys_Milliseconds();
+		lastTimestamp = SpeedrunTimerGetSystemMilliseconds();
 	}
 }
 
 void SpeedrunStoreCurrentTime()
 {
-	const int currentTimestamp = Sys_Milliseconds();
+	const int currentTimestamp = SpeedrunTimerGetSystemMilliseconds();
 	storedTotalTime += (currentTimestamp - lastTimestamp);
 	storedLevelTime += (currentTimestamp - lastTimestamp);
 	info.currentTotalTime = storedTotalTime;
@@ -113,20 +113,16 @@ void SpeedrunLevelFinished()
 	}
 
 	constexpr int printAccuracy = 3;
-	std::string timeString = GetTimeStringFromMilliseconds(info.currentLevelTime,
-	                                                       printAccuracy);
-	Com_Printf(S_COLOR_RED "=========================\n"
-	           S_COLOR_GREEN "Level time: " S_COLOR_WHITE "%s\n",
-	           timeString.c_str());
+	const std::string levelTimeString = GetTimeStringFromMilliseconds(
+		info.currentLevelTime, printAccuracy);
 	if (info.currentLevelTime != info.currentTotalTime)
 	{
-		timeString = GetTimeStringFromMilliseconds(info.currentTotalTime,
-		                                           printAccuracy);
-		Com_Printf(S_COLOR_GREEN "Total time: " S_COLOR_WHITE "%s\n",
-		           timeString.c_str());
+		const std::string totalTimeString = GetTimeStringFromMilliseconds(
+			info.currentTotalTime, printAccuracy);
+		SpeedrunTimerPrint(levelTimeString.c_str(), totalTimeString.c_str());
+	} else {
+		SpeedrunTimerPrint(levelTimeString.c_str(), nullptr);
 	}
-	Com_Printf(S_COLOR_RED "=========================\n");
-
 	storedLevelTime = 0;
 }
 
