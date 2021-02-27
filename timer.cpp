@@ -132,6 +132,11 @@ void SpeedrunLevelFinished()
 
 void SpeedrunRunFinished()
 {
+	if (info.isRunFinished)
+	{
+		return;
+	}
+
 	SpeedrunPauseTimer();
 	SpeedrunLevelFinished();
 	info.isRunFinished = true;
