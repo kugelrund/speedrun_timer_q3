@@ -1,13 +1,51 @@
 #include "../../server/exe_headers.h"
 #include "timer.h"
 #include "timer_helper.h"
+
+#include <algorithm>
+#include <array>
+#include <cassert>
 #include <string>
 
 
 int lastTimestamp = 0;
 int storedTotalTime = 0;
 int storedLevelTime = 0;
-bool paused = true;
+
+// Implements pausing with different priorities. For example, unpausing with
+// priority 1 will not actually unpause, if it is currently also paused with
+// priority 0. This allows handling overlapping pausing events of different
+// priority. For example, if the start of loading a new map happens earlier
+// than cutscene skipping being done, we can make "loading a new map" priority 0
+// and "cutscene skipping" priority 1 and it will be handled properly.
+class PausedState {
+public:
+	static constexpr int num_pause_flag_levels = 3;
+
+	PausedState() {
+		std::fill(pause_flags.begin(), pause_flags.end(), true);
+	}
+
+	void pause(int priority) {
+		assert(priority >= 0 && priority < num_pause_flag_levels);
+		std::fill(pause_flags.begin() + priority, pause_flags.end(), true);
+	}
+
+	void unpause(int priority) {
+		assert(priority >= 0 && priority < num_pause_flag_levels);
+		std::fill(pause_flags.begin() + priority, pause_flags.end(), false);
+	}
+
+	bool isPaused() const {
+		return std::any_of(pause_flags.cbegin(), pause_flags.cend(),
+		                   [](const auto flag) { return flag; });
+	}
+
+private:
+	std::array<bool, num_pause_flag_levels> pause_flags;
+};
+PausedState pause_state{};
+
 
 struct ExternVisibleInfo {
 	int currentTotalTime = 0;
@@ -24,12 +62,12 @@ void SpeedrunResetTimer()
 	info.currentTotalTime = 0;
 	info.currentLevelTime = 0;
 	info.isRunFinished = false;
-	paused = true;
+	pause_state.pause(0);
 }
 
 void SpeedrunUpdateTimer()
 {
-	if (paused)
+	if (pause_state.isPaused())
 	{
 		return;
 	}
@@ -39,11 +77,11 @@ void SpeedrunUpdateTimer()
 	info.currentLevelTime = storedLevelTime + (currentTimestamp - lastTimestamp);
 }
 
-void SpeedrunUnpauseTimer()
+void SpeedrunUnpauseTimer(int priority)
 {
-	if (paused)
+	pause_state.unpause(priority);
+	if (!pause_state.isPaused())
 	{
-		paused = false;
 		lastTimestamp = Sys_Milliseconds();
 	}
 }
@@ -58,21 +96,18 @@ void SpeedrunStoreCurrentTime()
 	lastTimestamp = currentTimestamp;
 }
 
-bool SpeedrunPauseTimer()
+void SpeedrunPauseTimer(int priority)
 {
-	if (paused)
+	if (!pause_state.isPaused())
 	{
-		return true;
+		SpeedrunStoreCurrentTime();
 	}
-
-	SpeedrunStoreCurrentTime();
-	paused = true;
-	return false;
+	pause_state.pause(priority);
 }
 
 void SpeedrunLevelFinished()
 {
-	if (!paused)
+	if (!pause_state.isPaused())
 	{
 		SpeedrunStoreCurrentTime();
 	}
