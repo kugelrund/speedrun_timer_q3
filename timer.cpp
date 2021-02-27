@@ -142,6 +142,10 @@ void SpeedrunRunFinished()
 	info.isRunFinished = true;
 }
 
+bool SpeedrunIsRunFinished() {
+	return info.isRunFinished;
+}
+
 int SpeedrunGetTotalTimeMilliseconds()
 {
 	return info.currentTotalTime;
