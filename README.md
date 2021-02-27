@@ -13,7 +13,8 @@ file called `speedrun_timer_includes.h` has to be created directly outside the
 submodule. It needs to declare the functions
 
 ```c
-void SpeedrunTimerPrint(const char *levelTimeString,
+void SpeedrunTimerPrint(bool printNotify,
+                        const char *levelTimeString,
                         const char *totalTimeString);
 int SpeedrunTimerGetSystemMilliseconds();
 ```

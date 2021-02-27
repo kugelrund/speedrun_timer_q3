@@ -105,7 +105,7 @@ void SpeedrunPauseTimer(int priority)
 	pause_state.pause(priority);
 }
 
-void SpeedrunLevelFinished()
+void SpeedrunLevelFinished(bool printNotify)
 {
 	if (!pause_state.isPaused())
 	{
@@ -119,14 +119,14 @@ void SpeedrunLevelFinished()
 	{
 		const std::string totalTimeString = GetTimeStringFromMilliseconds(
 			info.currentTotalTime, printAccuracy);
-		SpeedrunTimerPrint(levelTimeString.c_str(), totalTimeString.c_str());
+		SpeedrunTimerPrint(printNotify, levelTimeString.c_str(), totalTimeString.c_str());
 	} else {
-		SpeedrunTimerPrint(levelTimeString.c_str(), nullptr);
+		SpeedrunTimerPrint(printNotify, levelTimeString.c_str(), nullptr);
 	}
 	storedLevelTime = 0;
 }
 
-void SpeedrunRunFinished()
+void SpeedrunRunFinished(bool printNotify)
 {
 	if (info.isRunFinished)
 	{
@@ -134,7 +134,7 @@ void SpeedrunRunFinished()
 	}
 
 	SpeedrunPauseTimer();
-	SpeedrunLevelFinished();
+	SpeedrunLevelFinished(printNotify);
 	info.isRunFinished = true;
 }
 
