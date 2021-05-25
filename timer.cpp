@@ -79,8 +79,9 @@ void SpeedrunUpdateTimer()
 
 void SpeedrunUnpauseTimer(int priority)
 {
+	const bool was_paused = pause_state.isPaused();
 	pause_state.unpause(priority);
-	if (!pause_state.isPaused())
+	if (was_paused && !pause_state.isPaused())
 	{
 		lastTimestamp = SpeedrunTimerGetSystemMilliseconds();
 	}
