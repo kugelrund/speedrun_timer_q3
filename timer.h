@@ -10,3 +10,4 @@ void SpeedrunRunFinished(bool printNotify = true);
 bool SpeedrunIsRunFinished();
 int SpeedrunGetTotalTimeMilliseconds();
 int SpeedrunGetLevelTimeMilliseconds();
+void SpeedrunTimerAddMilliseconds(int msec);
