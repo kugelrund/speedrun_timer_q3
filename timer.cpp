@@ -79,6 +79,7 @@ void SpeedrunUpdateTimer()
 
 void SpeedrunUnpauseTimer(int priority)
 {
+	if (info.isRunFinished) return;
 	const bool was_paused = pause_state.isPaused();
 	pause_state.unpause(priority);
 	if (was_paused && !pause_state.isPaused())
