@@ -156,12 +156,6 @@ int SpeedrunGetLevelTimeMilliseconds()
 
 void SpeedrunTimerAddMilliseconds(int msec)
 {
-	if (pause_state.isPaused())
-	{
-		return;
-	}
-
 	storedTotalTime += msec;
 	storedLevelTime += msec;
-	lastTimestamp = SpeedrunTimerGetSystemMilliseconds();
 }
